@@ -30,19 +30,47 @@ document.addEventListener("DOMContentLoaded", function(){
         label.textContent = `${solved}/${total}`;
     }
     function displayUserData(parsedData){
-        const totalQuestions = parsedData.data.allQuestionsCount[0].count;
-        const totalEasyQuestions = parsedData.data.allQuestionsCount[1].count;
-        const totalMediumQuestions = parsedData.data.allQuestionsCount[2].count;
-        const totalHardQuestions = parsedData.data.allQuestionsCount[3].count;
+        // const totalQuestions = parsedData.data.allQuestionsCount[0].count;
+        // const totalEasyQuestions = parsedData.data.allQuestionsCount[1].count;
+        // const totalMediumQuestions = parsedData.data.allQuestionsCount[2].count;
+        // const totalHardQuestions = parsedData.data.allQuestionsCount[3].count;
 
-        const totalSolvedQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[0].count;
-        const totalSolvedEasyQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[1].count;
-        const totalSolvedMediumQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[2].count;
-        const totalSolvedHardQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[3].count;
+        // const totalSolvedQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[0].count;
+        // const totalSolvedEasyQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[1].count;
+        // const totalSolvedMediumQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[2].count;
+        // const totalSolvedHardQuestions = parsedData.data.matchedUser.submitStats.acSubmissionNum[3].count;
 
+        const totalQuestions = parsedData.totalQuestions;
+        const totalEasyQuestions = parsedData.totalEasy;
+        const totalMediumQuestions = parsedData.totalMedium;
+        const totalHardQuestions = parsedData.totalHard;
+    
+        const totalSolvedQuestions = parsedData.totalSolved;
+        const totalSolvedEasyQuestions = parsedData.easySolved;
+        const totalSolvedMediumQuestions = parsedData.mediumSolved;
+        const totalSolvedHardQuestions = parsedData.hardSolved;
+        
         updateProgress(totalSolvedEasyQuestions, totalEasyQuestions, easyLabel, easyCircle);
         updateProgress(totalSolvedMediumQuestions, totalMediumQuestions, mediumLabel, mediumCircle);
         updateProgress(totalSolvedHardQuestions, totalHardQuestions, hardLabel, hardCircle);
+
+        const cardsData = [
+        { label: "Total Solved", value: totalSolvedQuestions },
+        { label: "Acceptance Rate", value: parsedData.acceptanceRate + "%" },
+        { label: "Ranking", value: parsedData.ranking }
+        
+        ];
+
+        cardsStatsContainer.innerHTML = cardsData.map(
+            data => {
+                return `
+                <div class="card">
+                   <h3>${data.label}</h3>
+                   <p>${data.value}</p>
+                </div>
+                `;
+            }
+        ).join("");
 
     }
 
@@ -56,47 +84,47 @@ document.addEventListener("DOMContentLoaded", function(){
             searchButton.textContent="Searching....";
             searchButton.disabled=true;
             // let response = await fetch(url);
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            const targetUrl = 'https://leetcode.com/graphql/';
-            const myHeaders = new Headers();
-            myHeaders.append("content-type", "application/json");
+            const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
+            const targetUrl = `https://leetcode-stats-api.herokuapp.com/${username}`;
+            // const myHeaders = new Headers();
+            // myHeaders.append("content-type", "application/json");
 
-            const graphql = JSON.stringify({
-                query: `
-                  query userSessionProgress($username: String!) {
-                    allQuestionsCount {
-                      difficulty
-                      count
-                    }
-                    matchedUser(username: $username) {
-                      submitStats {
-                        acSubmissionNum {
-                          difficulty
-                          count
-                          submissions
-                        }
-                        totalSubmissionNum {
-                          difficulty
-                          count
-                          submissions
-                        }
-                      }
-                    }
-                  }
-                `,
-                variables: {
-                  username: username
-                }
-            });
+            // const graphql = JSON.stringify({
+            //     query: `
+            //       query userSessionProgress($username: String!) {
+            //         allQuestionsCount {
+            //           difficulty
+            //           count
+            //         }
+            //         matchedUser(username: $username) {
+            //           submitStats {
+            //             acSubmissionNum {
+            //               difficulty
+            //               count
+            //               submissions
+            //             }
+            //             totalSubmissionNum {
+            //               difficulty
+            //               count
+            //               submissions
+            //             }
+            //           }
+            //         }
+            //       }
+            //     `,
+            //     variables: {
+            //       username: username
+            //     }
+            // });
 
-            const requestOptions = {
-                method: "POST", 
-                headers: myHeaders,
-                body: graphql,
-                redirect: "follow"
-            };
+            // const requestOptions = {
+            //     method: "POST", 
+            //     headers: myHeaders,
+            //     body: graphql,
+            //     redirect: "follow"
+            // };
 
-            const response = await fetch(proxyUrl+targetUrl, requestOptions);
+            const response = await fetch(targetUrl);
             if(!response.ok){
                 throw new Error("Enable to fetch the user details");
             }
@@ -116,6 +144,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     searchButton.addEventListener('click', function(){
         const username = usernameInput.value;
+       
         if(validateUsername(username)){
             fetchUserDetail(username);
         }
